@@ -240,18 +240,18 @@ def main():
         st.subheader("Simulation Settings")
         num_agents = st.slider("Number of agents", 10, 100, 40, 
                              help="Number of agents in the simulation")
-        num_issues = st.slider("Number of belief dimensions", 2, 10, 5, 
+        num_issues = st.slider("Number of issues", 2, 10, 5, 
                              help="Number of issues that agents have beliefs about")
         affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
-                                       help="Scaling factor for affinity updates")
+                                       help="The rate at which agent affinity changes due to similarity of beliefs")
         positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
-                                          help="Strength of positive influence")
+                                          help="How strongly agents with similar beliefs influence each other's beliefs")
         negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
-                                          help="Strength of negative influence (negative value)")
+                                          help="How strongly agents with dissimilar beliefs polarize each other's beliefs")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         
         step_increment = st.slider("Steps per update", 1, 20, 5, 
-                                 help="Number of simulation steps per visualization update")
+                                 help="Higher the number of steps, faster the simulation progresses")
     
     # Create simulation with user parameters
     if 'simulation' not in st.session_state or st.button("Reset Simulation"):
