@@ -215,9 +215,9 @@ class PolarizationSimulation:
 
 # Streamlit app
 def main():
-    st.title("[Identity Alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) Simulation")
+    st.title("Identity Alignment Simulation")
     st.write("""
-    This application simulates the emergence of polarization in social networks.
+    This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
              
     Inspired by the following quote:
