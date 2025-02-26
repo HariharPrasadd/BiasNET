@@ -357,7 +357,10 @@ def main():
        - Compute the average distance across all agent pairs
        - Higher values indicate greater overall separation in belief space
     
-    For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1AxanyotI4AwhD6JS8Q4_qE2qUtngNNbU/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
+    Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
+    *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
+                
+    For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
     """, unsafe_allow_html=True)
 
 
