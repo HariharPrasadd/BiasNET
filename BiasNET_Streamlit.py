@@ -259,12 +259,12 @@ def main():
         step_increment = st.slider("Steps per update", 1, 20, 5, 
                                  help="Number of simulation steps per visualization update")
         
-        # Reset button (outside of dynamic content)
-        reset_sim = st.button("Reset Simulation")
+        # Sidebar reset button
+        sidebar_reset_sim = st.button("Reset Simulation")
     
     # === SIMULATION STATE MANAGEMENT ===
     # Create or reset simulation if needed
-    if "simulation" not in st.session_state or reset_sim:
+    if "simulation" not in st.session_state or sidebar_reset_sim or st.session_state.get('main_reset_clicked', False):
         st.session_state.simulation = PolarizationSimulation(
             num_agents=num_agents,
             num_issues=num_issues,
@@ -274,6 +274,9 @@ def main():
             negative_influence_rate=negative_influence_rate
         )
         st.session_state.paused = True
+        # Reset the main reset button flag
+        if 'main_reset_clicked' in st.session_state:
+            st.session_state.main_reset_clicked = False
         # Re-fetch the simulation reference after reset
         sim = st.session_state.simulation
     else:
@@ -282,7 +285,7 @@ def main():
         
     # === CONTROL BUTTONS (static UI elements) ===
     st.header("Simulation Controls")
-    cols = st.columns(3)
+    cols = st.columns(4)  # Changed from 3 to 4 to add reset button
     with cols[0]:
         if st.button("Run/Resume"):
             st.session_state.paused = False
@@ -294,6 +297,11 @@ def main():
             for _ in range(step_increment):
                 if not sim.step():
                     break
+    with cols[3]:
+        # New main reset button
+        if st.button("Reset", key="main_reset_button"):
+            st.session_state.main_reset_clicked = True
+            st.rerun()
     
     # === DYNAMIC CONTENT CONTAINER ===
     # This is the only section that will refresh constantly during runs
