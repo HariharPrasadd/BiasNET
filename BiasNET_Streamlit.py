@@ -214,29 +214,16 @@ class PolarizationSimulation:
         return fig
 
 # Streamlit app
-# Streamlit app
 def main():
-    st.title("Identity Alignment Simulation")
-    st.write("""
-    This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
-    Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
-             
-    Inspired by the following quote:
-             
-    *"Someone should demonstrate this more mathematically, but it seems to me that if you start with a random assortment of identities, 
-    small fluctuations plus reactions should force polarization.  That is, if a chance fluctuation makes environmentalists slightly more
-    likely to support gun control, and this new bloc goes around insulting polluters and gun owners, then the gun owners affected will reactively 
-    start hating the environmentalists and insult them, the environmentalists will notice they're being attacked by gun owners and polarize even 
-    more against them, and so on until (environmentalists + gun haters) and (polluters + gun lovers) have become two relatively consistent groups. 
-    Then if one guy from the (environmentalist + gun hater) group happens to insult a Catholic, the same process starts again until it's 
-    (environmentalists + gun haters + atheists) and (polluters + gun lovers + Catholics), and so on until there are just two big groups."*
-             
-    — Scott Alexander of AstralCodexTen, in his article [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist)
-    """)
+    # Set page title and configuration
+    st.set_page_config(page_title="Identity Alignment Simulation", layout="wide")
     
-    st.header("Simulation Parameters")
+    # Create placeholders for dynamic content
+    title_placeholder = st.empty()
+    intro_placeholder = st.empty()
+    header_placeholder = st.empty()
     
-    # Sidebar for parameters
+    # Initialize sidebar controls
     with st.sidebar:
         st.subheader("Simulation Settings")
         num_agents = st.slider("Number of agents", 10, 100, 40, 
@@ -254,8 +241,88 @@ def main():
         step_increment = st.slider("Steps per update", 1, 20, 5, 
                                  help="Number of simulation steps per visualization update")
     
-    # Create simulation with user parameters
-    if 'simulation' not in st.session_state or st.button("Reset Simulation"):
+    # Fill static content placeholders (only once)
+    title_placeholder.title("Identity Alignment Simulation")
+    
+    intro_placeholder.write("""
+    This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
+    Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
+             
+    Inspired by the following quote:
+             
+    *"Someone should demonstrate this more mathematically, but it seems to me that if you start with a random assortment of identities, 
+    small fluctuations plus reactions should force polarization.  That is, if a chance fluctuation makes environmentalists slightly more
+    likely to support gun control, and this new bloc goes around insulting polluters and gun owners, then the gun owners affected will reactively 
+    start hating the environmentalists and insult them, the environmentalists will notice they're being attacked by gun owners and polarize even 
+    more against them, and so on until (environmentalists + gun haters) and (polluters + gun lovers) have become two relatively consistent groups. 
+    Then if one guy from the (environmentalist + gun hater) group happens to insult a Catholic, the same process starts again until it's 
+    (environmentalists + gun haters + atheists) and (polluters + gun lovers + Catholics), and so on until there are just two big groups."*
+             
+    — Scott Alexander of AstralCodexTen, in his article [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist)
+    """)
+    
+    header_placeholder.header("Simulation Parameters")
+    
+    # Create placeholders for control buttons
+    control_cols = st.columns(3)
+    button_reset = control_cols[0].empty()
+    button_run = control_cols[0].empty()
+    button_pause = control_cols[1].empty()
+    button_step = control_cols[2].empty()
+    
+    # Create placeholders for dynamic simulation content
+    viz_placeholder = st.empty()
+    metrics_header = st.empty()
+    metrics_cols = st.columns(2)
+    metric1_placeholder = metrics_cols[0].empty()
+    metric2_placeholder = metrics_cols[1].empty()
+    progress_placeholder = st.empty()
+    
+    # Add a separator (static content)
+    separator = st.empty()
+    separator.write("---")
+    
+    # Add static explanation at the bottom (only rendered once)
+    st.write("""
+    ## How To Understand This Data
+    
+    ### 1. Network Graph
+    - **Nodes**: Agents
+    - **Node Colors**: Belief on first issue (red = positive, blue = negative)
+    - **Edges**: Significant affinities (|affinity| > 0.1)
+    - **Edge Colors**: Blue for positive affinity, red for negative
+    - **Edge Width**: Proportional to |affinity|
+    
+    ### 2. Belief Heatmap
+    - **X-axis**: Issues (1 to n)
+    - **Y-axis**: Agents
+    - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
+    - **Interpretation**: Each row shows one agent's beliefs across all issues
+    
+    ### 3. Correlation Matrix
+    - **Axes**: Issues
+    - **Colors**: Red = positive correlation, Blue = negative correlation
+    - **Interpretation**: Shows how beliefs on different issues have become associated
+    - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
+    
+    ### 4. Polarization Metrics
+    - **Correlation of Beliefs**:
+       - Calculate correlation matrix between all issue pairs
+       - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
+       - Higher values indicate stronger correlations between different issues
+    - **Belief Distance**:
+       - For each pair of agents, calculate the Euclidean distance between their belief vectors
+       - Compute the average distance across all agent pairs
+       - Higher values indicate greater overall separation in belief space
+    
+    Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
+    *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
+                
+    For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
+    """, unsafe_allow_html=True)
+    
+    # Initialize simulation
+    if 'simulation' not in st.session_state or button_reset.button("Reset Simulation"):
         st.session_state.simulation = PolarizationSimulation(
             num_agents=num_agents,
             num_issues=num_issues,
@@ -266,48 +333,33 @@ def main():
         )
         st.session_state.paused = True
     
-    # Control buttons
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("Run/Resume"):
-            st.session_state.paused = False
-    with col2:
-        if st.button("Pause"):
-            st.session_state.paused = True
-    with col3:
-        if st.button("Step"):
-            sim = st.session_state.simulation
-            for _ in range(step_increment):
-                if not sim.step():
-                    break
-    
-    # Create a placeholder for the simulation visualization and metrics
-    # This creates a clear separation between dynamic and static content
-    dynamic_content = st.container()
-    static_content = st.container()
-    
-    # Display all dynamic content (simulation visualization and metrics)
-    with dynamic_content:
-        # Display visualization
-        st.pyplot(st.session_state.simulation.create_visualization())
-        
-        # Display metrics
-        st.subheader("Current Metrics")
-        col1, col2 = st.columns(2)
-        with col1:
-            sim = st.session_state.simulation
-            if len(sim.polarization_metric_history) > 0:
-                st.metric("Belief Correlation", 
-                        round(sim.polarization_metric_history[-1], 3))
-        with col2:
-            if len(sim.belief_distance_history) > 0:
-                st.metric("Avg. Belief Distance", 
-                        round(sim.belief_distance_history[-1], 3))
-    
-    # Run simulation if not paused - this is after all static content
-    if not st.session_state.paused:
+    # Control buttons - these change session state but don't trigger re-renders
+    if button_run.button("Run/Resume"):
+        st.session_state.paused = False
+    if button_pause.button("Pause"):
+        st.session_state.paused = True
+    if button_step.button("Step"):
         sim = st.session_state.simulation
-        progress_bar = st.progress(0)
+        for _ in range(step_increment):
+            if not sim.step():
+                break
+    
+    # Update dynamic content in placeholders
+    sim = st.session_state.simulation
+    viz_placeholder.pyplot(sim.create_visualization())
+    
+    # Update metrics
+    metrics_header.subheader("Current Metrics")
+    if len(sim.polarization_metric_history) > 0:
+        metric1_placeholder.metric("Belief Correlation", 
+                    round(sim.polarization_metric_history[-1], 3))
+    if len(sim.belief_distance_history) > 0:
+        metric2_placeholder.metric("Avg. Belief Distance", 
+                    round(sim.belief_distance_history[-1], 3))
+    
+    # Only run simulation steps if not paused
+    if not st.session_state.paused:
+        progress_bar = progress_placeholder.progress(0)
         
         # Run simulation steps
         for i in range(step_increment):
@@ -320,49 +372,6 @@ def main():
         if not st.session_state.paused and sim.step_count < sim.max_steps:
             time.sleep(0.1)  # Small delay to prevent too rapid updates
             st.rerun()
-    
-    with static_content: 
-        # Add a separator between dynamic and static content
-        st.write("---")
-        
-        st.write("""
-        ## How To Understand This Data
-        
-        ### 1. Network Graph
-        - **Nodes**: Agents
-        - **Node Colors**: Belief on first issue (red = positive, blue = negative)
-        - **Edges**: Significant affinities (|affinity| > 0.1)
-        - **Edge Colors**: Blue for positive affinity, red for negative
-        - **Edge Width**: Proportional to |affinity|
-        
-        ### 2. Belief Heatmap
-        - **X-axis**: Issues (1 to n)
-        - **Y-axis**: Agents
-        - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
-        - **Interpretation**: Each row shows one agent's beliefs across all issues
-        
-        ### 3. Correlation Matrix
-        - **Axes**: Issues
-        - **Colors**: Red = positive correlation, Blue = negative correlation
-        - **Interpretation**: Shows how beliefs on different issues have become associated
-        - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
-        
-        ### 4. Polarization Metrics
-        - **Correlation of Beliefs**:
-        - Calculate correlation matrix between all issue pairs
-        - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
-        - Higher values indicate stronger correlations between different issues
-        - **Belief Distance**:
-        - For each pair of agents, calculate the Euclidean distance between their belief vectors
-        - Compute the average distance across all agent pairs
-        - Higher values indicate greater overall separation in belief space
-        
-        Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
-        *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
-                    
-        For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
-        """, unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
