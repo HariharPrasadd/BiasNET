@@ -284,6 +284,7 @@ def main():
     # Create a placeholder for the simulation visualization and metrics
     # This creates a clear separation between dynamic and static content
     dynamic_content = st.container()
+    static_content = st.container()
     
     # Display all dynamic content (simulation visualization and metrics)
     with dynamic_content:
@@ -320,48 +321,47 @@ def main():
             time.sleep(0.1)  # Small delay to prevent too rapid updates
             st.rerun()
     
-    # Add a separator between dynamic and static content
-    
-    
-
-
-st.write("""
-    ## How To Understand This Data
-    
-    ### 1. Network Graph
-    - **Nodes**: Agents
-    - **Node Colors**: Belief on first issue (red = positive, blue = negative)
-    - **Edges**: Significant affinities (|affinity| > 0.1)
-    - **Edge Colors**: Blue for positive affinity, red for negative
-    - **Edge Width**: Proportional to |affinity|
-    
-    ### 2. Belief Heatmap
-    - **X-axis**: Issues (1 to n)
-    - **Y-axis**: Agents
-    - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
-    - **Interpretation**: Each row shows one agent's beliefs across all issues
-    
-    ### 3. Correlation Matrix
-    - **Axes**: Issues
-    - **Colors**: Red = positive correlation, Blue = negative correlation
-    - **Interpretation**: Shows how beliefs on different issues have become associated
-    - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
-    
-    ### 4. Polarization Metrics
-    - **Correlation of Beliefs**:
-       - Calculate correlation matrix between all issue pairs
-       - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
-       - Higher values indicate stronger correlations between different issues
-    - **Belief Distance**:
-       - For each pair of agents, calculate the Euclidean distance between their belief vectors
-       - Compute the average distance across all agent pairs
-       - Higher values indicate greater overall separation in belief space
-    
-    Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
-    *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
-                
-    For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
-    """, unsafe_allow_html=True)
+    with static_content: 
+        # Add a separator between dynamic and static content
+        st.write("---")
+        
+        st.write("""
+        ## How To Understand This Data
+        
+        ### 1. Network Graph
+        - **Nodes**: Agents
+        - **Node Colors**: Belief on first issue (red = positive, blue = negative)
+        - **Edges**: Significant affinities (|affinity| > 0.1)
+        - **Edge Colors**: Blue for positive affinity, red for negative
+        - **Edge Width**: Proportional to |affinity|
+        
+        ### 2. Belief Heatmap
+        - **X-axis**: Issues (1 to n)
+        - **Y-axis**: Agents
+        - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
+        - **Interpretation**: Each row shows one agent's beliefs across all issues
+        
+        ### 3. Correlation Matrix
+        - **Axes**: Issues
+        - **Colors**: Red = positive correlation, Blue = negative correlation
+        - **Interpretation**: Shows how beliefs on different issues have become associated
+        - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
+        
+        ### 4. Polarization Metrics
+        - **Correlation of Beliefs**:
+        - Calculate correlation matrix between all issue pairs
+        - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
+        - Higher values indicate stronger correlations between different issues
+        - **Belief Distance**:
+        - For each pair of agents, calculate the Euclidean distance between their belief vectors
+        - Compute the average distance across all agent pairs
+        - Higher values indicate greater overall separation in belief space
+        
+        Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
+        *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
+                    
+        For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
+        """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
