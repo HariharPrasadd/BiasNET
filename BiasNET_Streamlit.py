@@ -299,7 +299,7 @@ def main():
                     break
     with cols[3]:
         # New main reset button
-        if st.button("Reset", key="main_reset_button"):
+        if st.button("Reset Simulation", key="main_reset_button"):
             st.session_state.main_reset_clicked = True
             st.rerun()
     
