@@ -5,6 +5,7 @@ import networkx as nx
 import time
 
 class PolarizationSimulation:
+    # [The class remains unchanged]
     def __init__(self, num_agents=40, num_issues=5, max_steps=500, 
                  affinity_change_rate=0.05, positive_influence_rate=0.05, 
                  negative_influence_rate=-0.03):  # Changed to negative value to match original
@@ -214,8 +215,11 @@ class PolarizationSimulation:
         return fig
 
 # Streamlit app
-# Streamlit app
 def main():
+    # Initialize session state variables if they don't exist
+    if 'initial_render_complete' not in st.session_state:
+        st.session_state.initial_render_complete = False
+    
     st.title("Social Polarization Simulation")
     st.write("""
     This application simulates the emergence of polarization in social networks.
@@ -281,32 +285,95 @@ def main():
                 if not sim.step():
                     break
     
-    # Create a placeholder for the simulation visualization and metrics
-    # This creates a clear separation between dynamic and static content
-    dynamic_content = st.container()
+    # This section contains all the dynamic content that will update with the simulation
+    # Create a placeholder for the simulation visualization
+    sim_placeholder = st.empty()
     
-    # Display all dynamic content (simulation visualization and metrics)
-    with dynamic_content:
-        # Display visualization
-        st.pyplot(st.session_state.simulation.create_visualization())
+    # Create placeholders for metrics
+    metrics_header = st.empty()
+    metrics_cols = st.columns(2)
+    metrics_col1 = metrics_cols[0].empty()
+    metrics_col2 = metrics_cols[1].empty()
+    
+    # Create a placeholder for the progress bar
+    progress_placeholder = st.empty()
+    
+    # Add a clear divider between dynamic and static content
+    st.markdown("---")
+    
+    # Mark that we've completed the initial render
+    # This helps us ensure the static content is only rendered once
+    if not st.session_state.initial_render_complete:
+        # This is the truly static content that should only be rendered once
+        # Apply custom CSS for headings
+        st.markdown("""
+        <style>
+        h2, h3 {
+            color: #50fa7b;
+        }
+        </style>
+        """, unsafe_allow_html=True)
         
-        # Display metrics
-        st.subheader("Current Metrics")
-        col1, col2 = st.columns(2)
-        with col1:
-            sim = st.session_state.simulation
-            if len(sim.polarization_metric_history) > 0:
-                st.metric("Belief Correlation", 
-                        round(sim.polarization_metric_history[-1], 3))
-        with col2:
-            if len(sim.belief_distance_history) > 0:
-                st.metric("Avg. Belief Distance", 
-                        round(sim.belief_distance_history[-1], 3))
+        # Static explanation content
+        st.markdown("""
+        ## How To Understand This Data
+        
+        ### 1. Network Graph
+        - **Nodes**: Agents
+        - **Node Colors**: Belief on first issue (red = positive, blue = negative)
+        - **Edges**: Significant affinities (|affinity| > 0.1)
+        - **Edge Colors**: Blue for positive affinity, red for negative
+        - **Edge Width**: Proportional to |affinity|
+        
+        ### 2. Belief Heatmap
+        - **X-axis**: Issues (1 to n)
+        - **Y-axis**: Agents
+        - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
+        - **Interpretation**: Each row shows one agent's beliefs across all issues
+        
+        ### 3. Correlation Matrix
+        - **Axes**: Issues
+        - **Colors**: Red = positive correlation, Blue = negative correlation
+        - **Interpretation**: Shows how beliefs on different issues have become associated
+        - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
+        
+        ### 4. Polarization Metrics
+        - **Correlation of Beliefs**:
+           - Calculate correlation matrix between all issue pairs
+           - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
+           - Higher values indicate stronger correlations between different issues
+        - **Belief Distance**:
+           - For each pair of agents, calculate the Euclidean distance between their belief vectors
+           - Compute the average distance across all agent pairs
+           - Higher values indicate greater overall separation in belief space
+        
+        Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
+        *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
+                    
+        For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
+        """, unsafe_allow_html=True)
+        
+        # Mark that we've completed the initial render
+        st.session_state.initial_render_complete = True
     
-    # Run simulation if not paused - this is after all static content
+    # Now update the dynamic content using the placeholders
+    # Display visualization in the placeholder
+    sim_placeholder.pyplot(st.session_state.simulation.create_visualization())
+    
+    # Display metrics in the placeholders
+    metrics_header.subheader("Current Metrics")
+    sim = st.session_state.simulation
+    if len(sim.polarization_metric_history) > 0:
+        metrics_col1.metric("Belief Correlation", 
+                    round(sim.polarization_metric_history[-1], 3))
+    if len(sim.belief_distance_history) > 0:
+        metrics_col2.metric("Avg. Belief Distance", 
+                    round(sim.belief_distance_history[-1], 3))
+    
+    # Run simulation if not paused
     if not st.session_state.paused:
         sim = st.session_state.simulation
-        progress_bar = st.progress(0)
+        progress_bar = progress_placeholder.progress(0)
         
         # Run simulation steps
         for i in range(step_increment):
@@ -319,56 +386,6 @@ def main():
         if not st.session_state.paused and sim.step_count < sim.max_steps:
             time.sleep(0.1)  # Small delay to prevent too rapid updates
             st.rerun()
-    
-    # Add a separator between dynamic and static content
-    st.markdown("---")
-    
-    # All static content below - this won't refresh when the simulation updates
-    st.markdown("""
-    <style>
-    h2, h3 {
-        color: #50fa7b;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ## How To Understand This Data
-    
-    ### 1. Network Graph
-    - **Nodes**: Agents
-    - **Node Colors**: Belief on first issue (red = positive, blue = negative)
-    - **Edges**: Significant affinities (|affinity| > 0.1)
-    - **Edge Colors**: Blue for positive affinity, red for negative
-    - **Edge Width**: Proportional to |affinity|
-    
-    ### 2. Belief Heatmap
-    - **X-axis**: Issues (1 to n)
-    - **Y-axis**: Agents
-    - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
-    - **Interpretation**: Each row shows one agent's beliefs across all issues
-    
-    ### 3. Correlation Matrix
-    - **Axes**: Issues
-    - **Colors**: Red = positive correlation, Blue = negative correlation
-    - **Interpretation**: Shows how beliefs on different issues have become associated
-    - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
-    
-    ### 4. Polarization Metrics
-    - **Correlation of Beliefs**:
-       - Calculate correlation matrix between all issue pairs
-       - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
-       - Higher values indicate stronger correlations between different issues
-    - **Belief Distance**:
-       - For each pair of agents, calculate the Euclidean distance between their belief vectors
-       - Compute the average distance across all agent pairs
-       - Higher values indicate greater overall separation in belief space
-    
-    Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
-    *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
-                
-    For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
-    """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
