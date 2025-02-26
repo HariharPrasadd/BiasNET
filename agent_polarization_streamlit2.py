@@ -219,7 +219,15 @@ def main():
     st.write("""
     This application simulates the emergence of polarization in social networks.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
-    Positive affinity leads to belief convergence, while negative affinity leads to belief divergence.
+             
+    Inspired by this quote by Scott Alexander of AstralCodexTen in his post [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist): 
+    Someone should demonstrate this more mathematically, but it seems to me that if you start with a random assortment of identities, 
+    small fluctuations plus reactions should force polarization.  That is, if a chance fluctuation makes environmentalists slightly more
+    likely to support gun control, and this new bloc goes around insulting polluters and gun owners, then the gun owners affected will reactively 
+    start hating the environmentalists and insult them, the environmentalists will notice they’re being attacked by gun owners and polarize even 
+    more against them, and so on until (environmentalists + gun haters) and (polluters + gun lovers) have become two relatively consistent groups. 
+    Then if one guy from the (environmentalist + gun hater) group happens to insult a Catholic, the same process starts again until it’s 
+    (environmentalists + gun haters + atheists) and (polluters + gun lovers + Catholics), and so on until there are just two big groups.
     """)
     
     st.header("Simulation Parameters")
@@ -305,6 +313,41 @@ def main():
         if len(sim.belief_distance_history) > 0:
             st.metric("Avg. Belief Distance", 
                     round(sim.belief_distance_history[-1], 3))
+    st.markdown("""
+    ## How To Understand This Data
+    
+    ### 1. Network Graph
+    - **Nodes**: Agents
+    - **Node Colors**: Belief on first issue (red = positive, blue = negative)
+    - **Edges**: Significant affinities (|affinity| > 0.1)
+    - **Edge Colors**: Blue for positive affinity, red for negative
+    - **Edge Width**: Proportional to |affinity|
+    
+    ### 2. Belief Heatmap
+    - **X-axis**: Issues (1 to n)
+    - **Y-axis**: Agents
+    - **Colors**: Red = positive belief (+1), Blue = negative belief (-1)
+    - **Interpretation**: Each row shows one agent's beliefs across all issues
+    
+    ### 3. Correlation Matrix
+    - **Axes**: Issues
+    - **Colors**: Red = positive correlation, Blue = negative correlation
+    - **Interpretation**: Shows how beliefs on different issues have become associated
+    - **Example**: If cell (1,2) is bright red, agents who believe strongly in issue 1 also tend to believe strongly in issue 2
+    
+    ### 4. Polarization Metrics
+    - **Correlation of Beliefs**:
+       - Calculate correlation matrix between all issue pairs
+       - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
+       - Higher values indicate stronger correlations between different issues
+    - **Belief Distance**:
+       - For each pair of agents, calculate the Euclidean distance between their belief vectors
+       - Compute the average distance across all agent pairs
+       - Higher values indicate greater overall separation in belief space
+    
+    For those of you interested in knowing how this works, here's the [barely technical overview](link).
+    """, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
