@@ -7,7 +7,7 @@ import time
 class PolarizationSimulation:
     def __init__(self, num_agents=40, num_issues=5, max_steps=500, 
                  affinity_change_rate=0.05, positive_influence_rate=0.05, 
-                 negative_influence_rate=0.03):
+                 negative_influence_rate=-0.03):  # Changed to negative value to match original
         # Simulation parameters
         self.num_agents = num_agents
         self.num_issues = num_issues
@@ -17,6 +17,7 @@ class PolarizationSimulation:
         self.negative_influence_rate = negative_influence_rate
         
         # Initialize agents' beliefs: random values between -1 and 1
+        # This is now done ONCE at the beginning, exactly like the original
         self.beliefs = np.random.uniform(-1, 1, size=(num_agents, num_issues))
         
         # Initialize affinity matrix (all start at 0)
@@ -66,7 +67,7 @@ class PolarizationSimulation:
                                       (self.beliefs[other_agent, issue] - self.beliefs[agent, issue])
                             social_influence += influence
                         elif self.affinity[agent, other_agent] < 0:
-                            # Push away from the other agent's belief
+                            # Push away from the other agent's belief - using negative influence rate directly
                             influence = self.negative_influence_rate * self.affinity[agent, other_agent] * \
                                       (self.beliefs[other_agent, issue] - self.beliefs[agent, issue])
                             social_influence += influence
@@ -94,12 +95,12 @@ class PolarizationSimulation:
     
     def calculate_belief_distance(self):
         """Calculate average Euclidean distance between all agents' belief vectors"""
+        # Removed normalization by sqrt(issues) to match original implementation
         total_distance = 0
         count = 0
         for i in range(self.num_agents):
             for j in range(i+1, self.num_agents):
-                # Scale by the number of dimensions to normalize
-                distance = np.linalg.norm(self.beliefs[i] - self.beliefs[j]) / np.sqrt(self.num_issues)
+                distance = np.linalg.norm(self.beliefs[i] - self.beliefs[j])
                 total_distance += distance
                 count += 1
         return total_distance / count if count > 0 else 0
@@ -234,8 +235,8 @@ def main():
                                        help="Scaling factor for affinity updates")
         positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
                                           help="Strength of positive influence")
-        negative_influence_rate = st.slider("Negative influence strength", 0.01, 0.2, 0.03, 0.01, 
-                                          help="Strength of negative influence")
+        negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
+                                          help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         
         step_increment = st.slider("Steps per update", 1, 20, 5, 
