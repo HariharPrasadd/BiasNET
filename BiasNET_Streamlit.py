@@ -215,7 +215,7 @@ class PolarizationSimulation:
 
 # Streamlit app
 def main():
-    st.title("Social Polarization Simulation")
+    st.title("Group Polarization/Identity Alignment Simulation")
     st.write("""
     This application simulates the emergence of polarization in social networks.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
