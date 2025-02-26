@@ -7,7 +7,7 @@ import time
 class PolarizationSimulation:
     def __init__(self, num_agents=40, num_issues=5, max_steps=500, 
                  affinity_change_rate=0.05, positive_influence_rate=0.05, 
-                 negative_influence_rate=-0.03):  # Changed to negative value to match original
+                 negative_influence_rate=-0.03):
         # Simulation parameters
         self.num_agents = num_agents
         self.num_issues = num_issues
@@ -17,7 +17,6 @@ class PolarizationSimulation:
         self.negative_influence_rate = negative_influence_rate
         
         # Initialize agents' beliefs: random values between -1 and 1
-        # This is now done ONCE at the beginning, exactly like the original
         self.beliefs = np.random.uniform(-1, 1, size=(num_agents, num_issues))
         
         # Initialize affinity matrix (all start at 0)
@@ -214,9 +213,18 @@ class PolarizationSimulation:
         return fig
 
 # Streamlit app
-# Streamlit app
 def main():
+    # Set page title and configuration
+    st.set_page_config(page_title="Identity Alignment Simulation", layout="wide")
+    
+    # Initialize session state if needed
+    if "initialization_complete" not in st.session_state:
+        st.session_state.initialization_complete = False
+        st.session_state.paused = True
+    
+    # === STATIC CONTENT (not inside dynamic section) ===
     st.title("Identity Alignment Simulation")
+    
     st.write("""
     This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
@@ -234,9 +242,7 @@ def main():
     — Scott Alexander of AstralCodexTen, in his article [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist)
     """)
     
-    st.header("Simulation Parameters")
-    
-    # Sidebar for parameters
+    # === SIDEBAR PARAMETERS (static UI, dynamic values) ===
     with st.sidebar:
         st.subheader("Simulation Settings")
         num_agents = st.slider("Number of agents", 10, 100, 40, 
@@ -250,12 +256,15 @@ def main():
         negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
                                           help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
-        
         step_increment = st.slider("Steps per update", 1, 20, 5, 
                                  help="Number of simulation steps per visualization update")
+        
+        # Reset button (outside of dynamic content)
+        reset_sim = st.button("Reset Simulation")
     
-    # Create simulation with user parameters
-    if 'simulation' not in st.session_state or st.button("Reset Simulation"):
+    # === SIMULATION STATE MANAGEMENT ===
+    # Create or reset simulation if needed
+    if "simulation" not in st.session_state or reset_sim:
         st.session_state.simulation = PolarizationSimulation(
             num_agents=num_agents,
             num_issues=num_issues,
@@ -265,73 +274,36 @@ def main():
             negative_influence_rate=negative_influence_rate
         )
         st.session_state.paused = True
-    
-    # Control buttons
-    col1, col2, col3 = st.columns(3)
-    with col1:
+        # Re-fetch the simulation reference after reset
+        sim = st.session_state.simulation
+    else:
+        # Use existing simulation
+        sim = st.session_state.simulation
+        
+    # === CONTROL BUTTONS (static UI elements) ===
+    st.header("Simulation Controls")
+    cols = st.columns(3)
+    with cols[0]:
         if st.button("Run/Resume"):
             st.session_state.paused = False
-    with col2:
+    with cols[1]:
         if st.button("Pause"):
             st.session_state.paused = True
-    with col3:
+    with cols[2]:
         if st.button("Step"):
-            sim = st.session_state.simulation
             for _ in range(step_increment):
                 if not sim.step():
                     break
     
-    # Create a placeholder for the simulation visualization and metrics
-    # This creates a clear separation between dynamic and static content
+    # === DYNAMIC CONTENT CONTAINER ===
+    # This is the only section that will refresh constantly during runs
     dynamic_content = st.container()
     
-    # Display all dynamic content (simulation visualization and metrics)
-    with dynamic_content:
-        # Display visualization
-        st.pyplot(st.session_state.simulation.create_visualization())
-        
-        # Display metrics
-        st.subheader("Current Metrics")
-        col1, col2 = st.columns(2)
-        with col1:
-            sim = st.session_state.simulation
-            if len(sim.polarization_metric_history) > 0:
-                st.metric("Belief Correlation", 
-                        round(sim.polarization_metric_history[-1], 3))
-        with col2:
-            if len(sim.belief_distance_history) > 0:
-                st.metric("Avg. Belief Distance", 
-                        round(sim.belief_distance_history[-1], 3))
-    
-    # Run simulation if not paused - this is after all static content
-    if not st.session_state.paused:
-        sim = st.session_state.simulation
-        progress_bar = st.progress(0)
-        
-        # Run simulation steps
-        for i in range(step_increment):
-            if not sim.step():
-                st.session_state.paused = True
-                break
-            progress_bar.progress(sim.step_count / sim.max_steps)
-        
-        # Only rerun if simulation is still active and not paused
-        if not st.session_state.paused and sim.step_count < sim.max_steps:
-            time.sleep(0.1)  # Small delay to prevent too rapid updates
-            st.rerun()
-    
-    # Add a separator between dynamic and static content
+    # Add a clear separator between dynamic and static content
     st.markdown("---")
     
-    # All static content below - this won't refresh when the simulation updates
-    st.markdown("""
-    <style>
-    h2, h3 {
-        color: #50fa7b;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
+    # === STATIC EXPLANATION CONTENT ===
+    # This section will remain stable during simulation updates
     st.markdown("""
     ## How To Understand This Data
     
@@ -357,19 +329,58 @@ def main():
     ### 4. Polarization Metrics
     - **Correlation of Beliefs**:
        - Calculate correlation matrix between all issue pairs
-       - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal. For example, (1, 2) and (2, 1) will have the same correlation value.
+       - Take the mean of the absolute values of the upper triangular portion, as the correlation matrix is equal across the diagonal.
        - Higher values indicate stronger correlations between different issues
     - **Belief Distance**:
        - For each pair of agents, calculate the Euclidean distance between their belief vectors
        - Compute the average distance across all agent pairs
        - Higher values indicate greater overall separation in belief space
     
-    Please note that this simulation is only for speculation purposes, and is in no way a comment on human behaviour. It is extremely simplified, and humans are a
-    *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
+    Please note that this simulation is only for speculation purposes, and is in no way a comment on human behavior. It is extremely simplified, and humans are a
+    *lot* more complicated than this. Despite that, I found agent behavior in this model super interesting, and wanted to share!
                 
     For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
-    """, unsafe_allow_html=True)
-
+    """)
+    
+    # === DYNAMIC CONTENT UPDATE ===
+    # Update dynamic content with current simulation state
+    with dynamic_content:
+        # Display visualization
+        st.subheader("Simulation Visualization")
+        st.pyplot(sim.create_visualization())
+        
+        # Display metrics
+        st.subheader("Current Metrics")
+        col1, col2 = st.columns(2)
+        with col1:
+            if len(sim.polarization_metric_history) > 0:
+                st.metric("Belief Correlation", 
+                        round(sim.polarization_metric_history[-1], 3))
+        with col2:
+            if len(sim.belief_distance_history) > 0:
+                st.metric("Avg. Belief Distance", 
+                        round(sim.belief_distance_history[-1], 3))
+                
+        # Progress indicator
+        if sim.step_count > 0:
+            progress = sim.step_count / sim.max_steps
+            st.progress(progress)
+    
+    # === SIMULATION RUNNING LOGIC ===
+    # Only run steps if not paused and rerun the app
+    if not st.session_state.paused:
+        # Run simulation steps
+        steps_completed = 0
+        for _ in range(step_increment):
+            steps_completed += 1
+            if not sim.step():
+                st.session_state.paused = True
+                break
+        
+        # Only trigger rerun if we need to continue simulation
+        if not st.session_state.paused and sim.step_count < sim.max_steps:
+            time.sleep(0.1)  # Small delay to prevent too rapid updates
+            st.rerun()
 
 if __name__ == "__main__":
     main()
