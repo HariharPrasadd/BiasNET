@@ -222,15 +222,15 @@ def main():
              
     Inspired by the following quote:
              
-    *""Someone should demonstrate this more mathematically, but it seems to me that if you start with a random assortment of identities, 
+    *"Someone should demonstrate this more mathematically, but it seems to me that if you start with a random assortment of identities, 
     small fluctuations plus reactions should force polarization.  That is, if a chance fluctuation makes environmentalists slightly more
     likely to support gun control, and this new bloc goes around insulting polluters and gun owners, then the gun owners affected will reactively 
     start hating the environmentalists and insult them, the environmentalists will notice they’re being attacked by gun owners and polarize even 
     more against them, and so on until (environmentalists + gun haters) and (polluters + gun lovers) have become two relatively consistent groups. 
     Then if one guy from the (environmentalist + gun hater) group happens to insult a Catholic, the same process starts again until it’s 
-    (environmentalists + gun haters + atheists) and (polluters + gun lovers + Catholics), and so on until there are just two big groups.""*
+    (environmentalists + gun haters + atheists) and (polluters + gun lovers + Catholics), and so on until there are just two big groups."*
              
-    — Scott Alexander of AstralCodexTen, in his article [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist)*
+    — Scott Alexander of AstralCodexTen, in his article [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist)
     """)
     
     st.header("Simulation Parameters")
@@ -357,7 +357,7 @@ def main():
        - Compute the average distance across all agent pairs
        - Higher values indicate greater overall separation in belief space
     
-    For those of you interested in knowing how this works or forking it for yourself, here's the (barely) [technical overview](https://drive.google.com/file/d/1AxanyotI4AwhD6JS8Q4_qE2qUtngNNbU/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
+    For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1AxanyotI4AwhD6JS8Q4_qE2qUtngNNbU/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
     """, unsafe_allow_html=True)
 
 
