@@ -291,7 +291,7 @@ def main():
         # Rerun to continue simulation
         time.sleep(0.1)  # Small delay to prevent too rapid updates
         if not st.session_state.paused:
-            st.experimental_rerun()
+            st.rerun()
     
     # Display metrics
     st.subheader("Current Metrics")
