@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import networkx as nx
 import time
-import base64
 
 class PolarizationSimulation:
     def __init__(self, num_agents=40, num_issues=5, max_steps=500, 
@@ -214,87 +213,11 @@ class PolarizationSimulation:
         plt.tight_layout()
         return fig
 
-# Function to get base64 encoded string for the plot
-def get_plot_as_base64(fig):
-    import io
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png', bbox_inches='tight')
-    buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode()
-    plt.close(fig)
-    return img_str
-
-# Add CSS for smooth transitions
-def add_smooth_transition_css():
-    st.markdown("""
-    <style>
-    .fade-in-out {
-        animation: fadeInOut 1s ease-in-out;
-    }
-    
-    @keyframes fadeInOut {
-        0% { opacity: 0.4; }
-        50% { opacity: 1; }
-        100% { opacity: 0.9; }
-    }
-    
-    .metric-transition {
-        transition: all 0.5s ease-in-out;
-        opacity: 0.9;
-    }
-    
-    .metric-transition:hover {
-        opacity: 1;
-    }
-    
-    .viz-container {
-        transition: opacity 0.6s ease-in-out;
-    }
-    
-    .progress-bar-container {
-        transition: all 0.3s ease-in-out;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
+# Streamlit app
 # Streamlit app
 def main():
-    # Set page title and configuration
-    st.set_page_config(page_title="Identity Alignment Simulation", layout="wide")
-    
-    # Add CSS for smooth transitions
-    add_smooth_transition_css()
-    
-    # Create placeholders for dynamic content
-    title_placeholder = st.empty()
-    intro_placeholder = st.empty()
-    header_placeholder = st.empty()
-    
-    # Initialize sidebar controls
-    with st.sidebar:
-        st.subheader("Simulation Settings")
-        num_agents = st.slider("Number of agents", 10, 100, 40, 
-                             help="Number of agents in the simulation")
-        num_issues = st.slider("Number of belief dimensions", 2, 10, 5, 
-                             help="Number of issues that agents have beliefs about")
-        affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
-                                       help="Scaling factor for affinity updates")
-        positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
-                                          help="Strength of positive influence")
-        negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
-                                          help="Strength of negative influence (negative value)")
-        max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
-        
-        step_increment = st.slider("Steps per update", 1, 20, 5, 
-                                 help="Number of simulation steps per visualization update")
-        
-        animation_speed = st.slider("Animation Speed", 0.1, 2.0, 1.0, 0.1,
-                                help="Controls the speed of transitions (lower is slower)")
-    
-    # Fill static content placeholders (only once)
-    title_placeholder.title("Identity Alignment Simulation")
-    
-    intro_placeholder.write("""
+    st.title("Identity Alignment Simulation")
+    st.write("""
     This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
              
@@ -311,28 +234,95 @@ def main():
     — Scott Alexander of AstralCodexTen, in his article [Why I Am Not A Conflict Theorist](https://www.astralcodexten.com/p/why-i-am-not-a-conflict-theorist)
     """)
     
-    header_placeholder.header("Simulation Parameters")
+    st.header("Simulation Parameters")
     
-    # Create placeholders for control buttons
-    control_cols = st.columns(3)
-    button_reset = control_cols[0].empty()
-    button_run = control_cols[0].empty()
-    button_pause = control_cols[1].empty()
-    button_step = control_cols[2].empty()
+    # Sidebar for parameters
+    with st.sidebar:
+        st.subheader("Simulation Settings")
+        num_agents = st.slider("Number of agents", 10, 100, 40, 
+                             help="Number of agents in the simulation")
+        num_issues = st.slider("Number of belief dimensions", 2, 10, 5, 
+                             help="Number of issues that agents have beliefs about")
+        affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
+                                       help="Scaling factor for affinity updates")
+        positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
+                                          help="Strength of positive influence")
+        negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
+                                          help="Strength of negative influence (negative value)")
+        max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
+        
+        step_increment = st.slider("Steps per update", 1, 20, 5, 
+                                 help="Number of simulation steps per visualization update")
     
-    # Create placeholders for dynamic simulation content
-    viz_placeholder = st.empty()
-    metrics_header = st.empty()
-    metrics_cols = st.columns(2)
-    metric1_placeholder = metrics_cols[0].empty()
-    metric2_placeholder = metrics_cols[1].empty()
-    progress_placeholder = st.empty()
+    # Create simulation with user parameters
+    if 'simulation' not in st.session_state or st.button("Reset Simulation"):
+        st.session_state.simulation = PolarizationSimulation(
+            num_agents=num_agents,
+            num_issues=num_issues,
+            max_steps=max_steps,
+            affinity_change_rate=affinity_change_rate,
+            positive_influence_rate=positive_influence_rate,
+            negative_influence_rate=negative_influence_rate
+        )
+        st.session_state.paused = True
     
-    # Add a separator (static content)
-    separator = st.empty()
-    separator.write("---")
+    # Control buttons
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Run/Resume"):
+            st.session_state.paused = False
+    with col2:
+        if st.button("Pause"):
+            st.session_state.paused = True
+    with col3:
+        if st.button("Step"):
+            sim = st.session_state.simulation
+            for _ in range(step_increment):
+                if not sim.step():
+                    break
     
-    # Add static explanation at the bottom (only rendered once)
+    # Create a placeholder for the simulation visualization and metrics
+    # This creates a clear separation between dynamic and static content
+    dynamic_content = st.container()
+    
+    # Display all dynamic content (simulation visualization and metrics)
+    with dynamic_content:
+        # Display visualization
+        st.pyplot(st.session_state.simulation.create_visualization())
+        
+        # Display metrics
+        st.subheader("Current Metrics")
+        col1, col2 = st.columns(2)
+        with col1:
+            sim = st.session_state.simulation
+            if len(sim.polarization_metric_history) > 0:
+                st.metric("Belief Correlation", 
+                        round(sim.polarization_metric_history[-1], 3))
+        with col2:
+            if len(sim.belief_distance_history) > 0:
+                st.metric("Avg. Belief Distance", 
+                        round(sim.belief_distance_history[-1], 3))
+    
+    # Run simulation if not paused - this is after all static content
+    if not st.session_state.paused:
+        sim = st.session_state.simulation
+        progress_bar = st.progress(0)
+        
+        # Run simulation steps
+        for i in range(step_increment):
+            if not sim.step():
+                st.session_state.paused = True
+                break
+            progress_bar.progress(sim.step_count / sim.max_steps)
+        
+        # Only rerun if simulation is still active and not paused
+        if not st.session_state.paused and sim.step_count < sim.max_steps:
+            time.sleep(0.1)  # Small delay to prevent too rapid updates
+            st.rerun()
+    
+    # Add a separator between dynamic and static content
+    st.write("---")
+
     st.write("""
     ## How To Understand This Data
     
@@ -370,101 +360,7 @@ def main():
                 
     For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
     """, unsafe_allow_html=True)
-    
-    # Initialize simulation
-    if 'simulation' not in st.session_state or button_reset.button("Reset Simulation"):
-        st.session_state.simulation = PolarizationSimulation(
-            num_agents=num_agents,
-            num_issues=num_issues,
-            max_steps=max_steps,
-            affinity_change_rate=affinity_change_rate,
-            positive_influence_rate=positive_influence_rate,
-            negative_influence_rate=negative_influence_rate
-        )
-        st.session_state.paused = True
-        st.session_state.viz_id = 0  # Add an ID for viz to force re-render with fade
-    
-    # Control buttons - these change session state but don't trigger re-renders
-    if button_run.button("Run/Resume"):
-        st.session_state.paused = False
-    if button_pause.button("Pause"):
-        st.session_state.paused = True
-    if button_step.button("Step"):
-        sim = st.session_state.simulation
-        for _ in range(step_increment):
-            if not sim.step():
-                break
-        # Increment viz_id to force fade-in effect
-        st.session_state.viz_id = st.session_state.get('viz_id', 0) + 1
-    
-    # Update dynamic content in placeholders
-    sim = st.session_state.simulation
-    
-    # Create visualization and convert to base64 for HTML embedding
-    fig = sim.create_visualization()
-    plot_base64 = get_plot_as_base64(fig)
-    
-    # Use HTML with fade-in animation for visualization
-    viz_html = f"""
-    <div class="viz-container fade-in-out" style="text-align: center;">
-        <img src="data:image/png;base64,{plot_base64}" 
-             style="width: 100%; max-width: 1200px;" 
-             alt="Simulation Visualization"
-             id="viz-{st.session_state.get('viz_id', 0)}">
-    </div>
-    """
-    viz_placeholder.markdown(viz_html, unsafe_allow_html=True)
-    
-    # Update metrics with animation
-    metrics_header.subheader("Current Metrics")
-    
-    if len(sim.polarization_metric_history) > 0:
-        metric1_html = f"""
-        <div class="metric-transition" style="padding: 10px; background-color: rgba(240, 242, 246, 0.1); border-radius: 5px;">
-            <h4>Belief Correlation</h4>
-            <h2>{round(sim.polarization_metric_history[-1], 3)}</h2>
-        </div>
-        """
-        metric1_placeholder.markdown(metric1_html, unsafe_allow_html=True)
-    
-    if len(sim.belief_distance_history) > 0:
-        metric2_html = f"""
-        <div class="metric-transition" style="padding: 10px; background-color: rgba(240, 242, 246, 0.1); border-radius: 5px;">
-            <h4>Avg. Belief Distance</h4>
-            <h2>{round(sim.belief_distance_history[-1], 3)}</h2>
-        </div>
-        """
-        metric2_placeholder.markdown(metric2_html, unsafe_allow_html=True)
-    
-    # Progress bar with smooth animation
-    progress_percentage = sim.step_count / sim.max_steps
-    progress_html = f"""
-    <div class="progress-bar-container">
-        <div style="width: 100%; background-color: #ddd; border-radius: 5px; height: 20px;">
-            <div style="width: {progress_percentage * 100}%; background-color: #4CAF50; 
-                 height: 20px; border-radius: 5px; transition: width 0.5s ease-in-out;">
-            </div>
-        </div>
-        <p style="text-align: center;">Step {sim.step_count} of {sim.max_steps}</p>
-    </div>
-    """
-    progress_placeholder.markdown(progress_html, unsafe_allow_html=True)
-    
-    # Only run simulation steps if not paused
-    if not st.session_state.paused:
-        # Run simulation steps
-        for i in range(step_increment):
-            if not sim.step():
-                st.session_state.paused = True
-                break
-        
-        # Increment viz_id to force fade-in effect with each update
-        st.session_state.viz_id = st.session_state.get('viz_id', 0) + 1
-        
-        # Only rerun if simulation is still active and not paused
-        if not st.session_state.paused and sim.step_count < sim.max_steps:
-            time.sleep(0.2 / animation_speed)  # Delay adjusted by animation speed
-            st.rerun()
+
 
 if __name__ == "__main__":
     main()
