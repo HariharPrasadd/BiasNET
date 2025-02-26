@@ -214,10 +214,11 @@ class PolarizationSimulation:
         return fig
 
 # Streamlit app
+# Streamlit app
 def main():
-    st.title("Identity Alignment Simulation")
+    st.title("Social Polarization Simulation")
     st.write("""
-    This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
+    This application simulates the emergence of polarization in social networks.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity.
              
     Inspired by the following quote:
@@ -240,18 +241,18 @@ def main():
         st.subheader("Simulation Settings")
         num_agents = st.slider("Number of agents", 10, 100, 40, 
                              help="Number of agents in the simulation")
-        num_issues = st.slider("Number of issues", 2, 10, 5, 
+        num_issues = st.slider("Number of belief dimensions", 2, 10, 5, 
                              help="Number of issues that agents have beliefs about")
         affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
-                                       help="The rate at which agent affinity changes due to similarity of beliefs")
+                                       help="Scaling factor for affinity updates")
         positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
-                                          help="How strongly agents with similar beliefs influence each other's beliefs")
+                                          help="Strength of positive influence")
         negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
-                                          help="How strongly agents with dissimilar beliefs polarize each other's beliefs")
+                                          help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         
         step_increment = st.slider("Steps per update", 1, 20, 5, 
-                                 help="Higher the number of steps, faster the simulation progresses")
+                                 help="Number of simulation steps per visualization update")
     
     # Create simulation with user parameters
     if 'simulation' not in st.session_state or st.button("Reset Simulation"):
@@ -280,18 +281,29 @@ def main():
                 if not sim.step():
                     break
     
-    # Create a placeholder for the simulation visualization
-    vis_container = st.container()
+    # Create a placeholder for the simulation visualization and metrics
+    # This creates a clear separation between dynamic and static content
+    dynamic_content = st.container()
     
-    # Display the visualization outside the conditional block to prevent flickering
-    with vis_container:
+    # Display all dynamic content (simulation visualization and metrics)
+    with dynamic_content:
+        # Display visualization
         st.pyplot(st.session_state.simulation.create_visualization())
+        
+        # Display metrics
+        st.subheader("Current Metrics")
+        col1, col2 = st.columns(2)
+        with col1:
+            sim = st.session_state.simulation
+            if len(sim.polarization_metric_history) > 0:
+                st.metric("Belief Correlation", 
+                        round(sim.polarization_metric_history[-1], 3))
+        with col2:
+            if len(sim.belief_distance_history) > 0:
+                st.metric("Avg. Belief Distance", 
+                        round(sim.belief_distance_history[-1], 3))
     
-    # Create a stable heading and placeholder for metrics
-    st.subheader("Current Metrics")
-    metric_container = st.container()
-    
-    # Run simulation if not paused
+    # Run simulation if not paused - this is after all static content
     if not st.session_state.paused:
         sim = st.session_state.simulation
         progress_bar = st.progress(0)
@@ -303,36 +315,15 @@ def main():
                 break
             progress_bar.progress(sim.step_count / sim.max_steps)
         
-        # Update metrics in the container
-        with metric_container:
-            col1, col2 = st.columns(2)
-            with col1:
-                if len(sim.polarization_metric_history) > 0:
-                    st.metric("Belief Correlation", 
-                            round(sim.polarization_metric_history[-1], 3))
-            with col2:
-                if len(sim.belief_distance_history) > 0:
-                    st.metric("Avg. Belief Distance", 
-                            round(sim.belief_distance_history[-1], 3))
-        
         # Only rerun if simulation is still active and not paused
         if not st.session_state.paused and sim.step_count < sim.max_steps:
             time.sleep(0.1)  # Small delay to prevent too rapid updates
             st.rerun()
-    else:
-        # Display metrics even when paused
-        with metric_container:
-            col1, col2 = st.columns(2)
-            with col1:
-                sim = st.session_state.simulation
-                if len(sim.polarization_metric_history) > 0:
-                    st.metric("Belief Correlation", 
-                            round(sim.polarization_metric_history[-1], 3))
-            with col2:
-                if len(sim.belief_distance_history) > 0:
-                    st.metric("Avg. Belief Distance", 
-                            round(sim.belief_distance_history[-1], 3))
-            
+    
+    # Add a separator between dynamic and static content
+    st.markdown("---")
+    
+    # All static content below - this won't refresh when the simulation updates
     st.markdown("""
     <style>
     h2, h3 {
