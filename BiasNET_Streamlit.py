@@ -215,20 +215,11 @@ class PolarizationSimulation:
 
 # Streamlit app
 
+@st.cache_data
 def datainterpretation():
     # Add a separator between dynamic and static content
-    st.markdown("---")
-    
-    # All static content below - this won't refresh when the simulation updates
-    st.markdown("""
-    <style>
-    h2, h3 {
-        color: #50fa7b;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
+    return """
+    ---
     ## How To Understand This Data
     
     ### 1. Network Graph
@@ -264,7 +255,7 @@ def datainterpretation():
     *lot* more complicated than this. Despite that, I found agent behaviour in this model super interesting, and wanted to share!
                 
     For those of you interested in knowing how this works or forking it and messing around, here's the (*barely*) [technical overview](https://drive.google.com/file/d/1Q4f4wl2Dbo5_dXIwu_QIjx3ufgVnVGmL/view?usp=sharing) and [Github Repo](https://github.com/HariharPrasadd/BiasNET).
-    """, unsafe_allow_html=True)
+    """
 
 def main():
     st.title("Social Polarization Simulation")
@@ -371,7 +362,9 @@ def main():
             time.sleep(0.1)  # Small delay to prevent too rapid updates
             st.rerun()
     
-    datainterpretation()
+    staticdata = datainterpretation()
+
+    st.markdown(staticdata, unsafe_allow_html = True)
 
 
 if __name__ == "__main__":
