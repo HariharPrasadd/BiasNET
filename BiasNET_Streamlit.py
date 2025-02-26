@@ -321,7 +321,7 @@ def main():
             st.rerun()
     
     # Add a separator between dynamic and static content
-    st.markdown("---")
+    st.write("---")
     
     # All static content below - this won't refresh when the simulation updates
     st.markdown("""
@@ -332,7 +332,7 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
+    st.write("""
     ## How To Understand This Data
     
     ### 1. Network Graph
