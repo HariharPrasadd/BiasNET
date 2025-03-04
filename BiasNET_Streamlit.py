@@ -200,7 +200,7 @@ class PolarizationSimulation:
         ax_polarization.plot(self.belief_distance_history, lw=2, linestyle='--', 
                            color='green', label='Avg. Belief Distance')
         ax_polarization.set_xlim(0, self.max_steps)
-        ax_polarization.set_ylim(0, 2)  # Adjusted for both metrics
+        ax_polarization.set_ylim(0, 3)  # Adjusted for both metrics
         ax_polarization.set_xlabel('Step')
         ax_polarization.set_ylabel('Polarization Metrics')
         ax_polarization.set_title('Polarization Over Time')
@@ -254,9 +254,9 @@ def main():
                              help="Number of issues that agents have beliefs about")
         affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
                                        help="Scaling factor for affinity updates")
-        positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
+        positive_influence_rate = st.slider("Positive influence strength", 0.001, 0.02, 0.005, 0.001,
                                           help="Strength of positive influence")
-        negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
+        negative_influence_rate = st.slider("Negative influence strength", -0.02, -0.001, -0.003, 0.001,
                                           help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         step_increment = st.slider("Steps per update", 1, 20, 5, 
