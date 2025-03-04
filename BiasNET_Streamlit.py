@@ -70,7 +70,7 @@ class PolarizationSimulation:
                             # Push away from the other agent's belief - using negative influence rate directly
                             influence = self.negative_influence_rate * self.affinity[agent, other_agent] * \
                                       (self.beliefs[other_agent, issue] - self.beliefs[agent, issue])
-                            social_influence += influence
+                            social_influence -= influence
                 
                 # Apply social influence
                 new_beliefs[agent, issue] += social_influence
