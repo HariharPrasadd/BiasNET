@@ -46,8 +46,8 @@ class PolarizationSimulation:
         new_beliefs = self.beliefs.copy()
 
         #declare influence of positive and negative beliefs for affinity with other agents
-        positive_influence_rate = 0.05
-        negative_influence_rate = -0.03
+        positive_influence_rate = 0.005
+        negative_influence_rate = -0.003
         
         for agent in range(self.num_agents):
             for issue in range(self.num_issues):
@@ -68,7 +68,7 @@ class PolarizationSimulation:
                             # Push away from the other agent's belief
                             influence = negative_influence_rate * self.affinity[agent, other_agent] * \
                                       (self.beliefs[other_agent, issue] - self.beliefs[agent, issue])
-                            social_influence += influence
+                            social_influence -= influence
                 
                 # Apply social influence
                 new_beliefs[agent, issue] += social_influence
@@ -168,7 +168,7 @@ class PolarizationSimulation:
         belief_distance_line, = ax_polarization.plot([], [], lw=2, linestyle='--', color='green', 
                                                    label='Avg. Belief Distance')
         ax_polarization.set_xlim(0, self.max_steps)
-        ax_polarization.set_ylim(0, 2)  # Adjusted for both metrics
+        ax_polarization.set_ylim(0, 3)  # Adjusted for both metrics
         ax_polarization.set_xlabel('Step')
         ax_polarization.set_ylabel('Polarization Metrics')
         ax_polarization.set_title('Polarization Over Time')
