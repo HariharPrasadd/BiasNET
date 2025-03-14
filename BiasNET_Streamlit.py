@@ -230,7 +230,7 @@ def main():
     This application simulates how [identity alignment](https://www.astralcodexten.com/i/157690414/why-identity-alignment) could have evolved in society.
     Agents hold beliefs on multiple issues and develop affinities with other agents based on belief similarity. Click "Run" to see the simulation run, 
     reset it, modify a few parameters, and see how that affects how beliefs change over time. If you want to increase the speed of the simulation, 
-    increase the number of steps in the sidebar. Hover over the "?" icon to understand what each parameter means.
+    increase the number of steps in the sidebar. Hover over the "?" icon to understand what each parameter means
              
     Inspired by the following quote:
              
