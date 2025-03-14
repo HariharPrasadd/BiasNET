@@ -254,9 +254,9 @@ def main():
                              help="Number of issues that agents have beliefs about")
         affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
                                        help="Scaling factor for affinity updates")
-        positive_influence_rate = st.slider("Positive influence strength", 0.001, 0.02, 0.005, 0.001,
+        positive_influence_rate = st.slider("Positive influence strength", 0.0001, 0.002, 0.0005, 0.0001,
                                           help="Strength of positive influence")
-        negative_influence_rate = st.slider("Negative influence strength", -0.02, -0.001, -0.003, 0.001,
+        negative_influence_rate = st.slider("Negative influence strength", -0.002, -0.0001, -0.0003, 0.0001,
                                           help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         step_increment = st.slider("Steps per update", 1, 20, 5, 
