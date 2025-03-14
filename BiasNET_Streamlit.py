@@ -256,10 +256,10 @@ def main():
                                     help="How fast affinity changes based on beliefs")
         # Fix for displaying small decimal values - use format string
         positive_influence_rate = st.slider("Positive influence strength", 0.0001, 0.002, 0.0005, 0.0001,
-                                        format="%.6f",
+                                        format="%.4f",
                                         help="Strength of positive influence")
         negative_influence_rate = st.slider("Negative influence strength", -0.002, -0.0001, -0.0003, 0.0001,
-                                        format="%.6f",
+                                        format="%.4f",
                                         help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         step_increment = st.slider("Steps per update", 1, 20, 5, 
