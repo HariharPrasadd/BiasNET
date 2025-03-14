@@ -70,7 +70,7 @@ class PolarizationSimulation:
                             # Push away from the other agent's belief - using negative influence rate directly
                             influence = self.negative_influence_rate * self.affinity[agent, other_agent] * \
                                       (self.beliefs[other_agent, issue] - self.beliefs[agent, issue])
-                            social_influence += influence
+                            social_influence -= influence
                 
                 # Apply social influence
                 new_beliefs[agent, issue] += social_influence
@@ -200,7 +200,7 @@ class PolarizationSimulation:
         ax_polarization.plot(self.belief_distance_history, lw=2, linestyle='--', 
                            color='green', label='Avg. Belief Distance')
         ax_polarization.set_xlim(0, self.max_steps)
-        ax_polarization.set_ylim(0, 2)  # Adjusted for both metrics
+        ax_polarization.set_ylim(0, 3)  # Adjusted for both metrics
         ax_polarization.set_xlabel('Step')
         ax_polarization.set_ylabel('Polarization Metrics')
         ax_polarization.set_title('Polarization Over Time')
@@ -249,18 +249,21 @@ def main():
     with st.sidebar:
         st.subheader("Simulation Settings")
         num_agents = st.slider("Number of agents", 10, 100, 40, 
-                             help="Number of agents in the simulation")
+                            help="Number of agents in the simulation")
         num_issues = st.slider("Number of belief dimensions", 2, 10, 5, 
-                             help="Number of issues that agents have beliefs about")
+                            help="Number of issues that agents have beliefs about")
         affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
-                                       help="Scaling factor for affinity updates")
-        positive_influence_rate = st.slider("Positive influence strength", 0.01, 0.2, 0.05, 0.01, 
-                                          help="Strength of positive influence")
-        negative_influence_rate = st.slider("Negative influence strength", -0.2, -0.01, -0.03, 0.01, 
-                                          help="Strength of negative influence (negative value)")
+                                    help="How fast affinity changes based on beliefs")
+        # Fix for displaying small decimal values - use format string
+        positive_influence_rate = st.slider("Positive influence strength", 0.0002, 0.004, 0.001, 0.0002,
+                                        format="%.4f",
+                                        help="Strength of positive influence")
+        negative_influence_rate = st.slider("Negative influence strength", -0.004, -0.0002, -0.0006, 0.0002,
+                                        format="%.4f",
+                                        help="Strength of negative influence (negative value)")
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         step_increment = st.slider("Steps per update", 1, 20, 5, 
-                                 help="Number of simulation steps per visualization update")
+                                help="Increase to make the simulation go faster, decrease to make the simulation go slower")
         
         # Sidebar reset button
         sidebar_reset_sim = st.button("Reset Simulation")
