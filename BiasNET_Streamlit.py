@@ -253,14 +253,14 @@ def main():
         num_issues = st.slider("Number of belief dimensions", 2, 10, 5, 
                              help="Number of issues that agents have beliefs about")
         affinity_change_rate = st.slider("Affinity change rate", 0.01, 0.2, 0.05, 0.01, 
-                                       help="Scaling factor for affinity updates")
-        positive_influence_rate = st.slider("Positive influence strength", 0.0001, 0.002, 0.0005, 0.0001,
-                                          help="Strength of positive influence")
-        negative_influence_rate = st.slider("Negative influence strength", -0.002, -0.0001, -0.0003, 0.0001,
-                                          help="Strength of negative influence (negative value)")
+                                       help="How fast affinity changes based on beliefs")
+        positive_influence_rate = st.slider("Positive influence strength", 0.1, 2, 0.5, 0.1,
+                                          help="Strength of positive influence")/1000
+        negative_influence_rate = st.slider("Negative influence strength", -2, -0.1, -0.3, 1,
+                                          help="Strength of negative influence (negative value)")/1000
         max_steps = st.slider("Maximum simulation steps", 100, 1000, 500, 50)
         step_increment = st.slider("Steps per update", 1, 20, 5, 
-                                 help="Number of simulation steps per visualization update")
+                                 help="Increase to make the simulation go faster, decrease to make the simulation go slower")
         
         # Sidebar reset button
         sidebar_reset_sim = st.button("Reset Simulation")
